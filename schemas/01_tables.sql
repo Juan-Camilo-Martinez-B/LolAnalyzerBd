@@ -93,3 +93,30 @@ CREATE TABLE IF NOT EXISTS match_records (
     CONSTRAINT chk_matches_cs CHECK (cs >= 0),
     CONSTRAINT chk_matches_duration CHECK (duration_seconds >= 0)
 );
+
+-- =============================================================================
+-- 4. Table: match_telemetry_points
+-- High-frequency time-series data captured during match execution:
+-- CS progression, CS/min rate, kills, deaths, flash cooldown state,
+-- and instantaneous tactical coach advice.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS match_telemetry_points (
+    id SERIAL PRIMARY KEY,
+    match_id INTEGER NOT NULL,
+    game_time_seconds DOUBLE PRECISION NOT NULL,
+    cs INTEGER NOT NULL DEFAULT 0,
+    cs_per_minute DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    kills INTEGER NOT NULL DEFAULT 0,
+    deaths INTEGER NOT NULL DEFAULT 0,
+    flash_ready BOOLEAN NOT NULL DEFAULT TRUE,
+    advice_text VARCHAR(255) NULL,
+
+    -- Foreign Keys & Constraints
+    CONSTRAINT fk_telemetry_match FOREIGN KEY (match_id)
+        REFERENCES match_records (id) ON DELETE CASCADE,
+    CONSTRAINT chk_telemetry_time CHECK (game_time_seconds >= 0.0),
+    CONSTRAINT chk_telemetry_cs CHECK (cs >= 0),
+    CONSTRAINT chk_telemetry_cs_pm CHECK (cs_per_minute >= 0.0),
+    CONSTRAINT chk_telemetry_kills CHECK (kills >= 0),
+    CONSTRAINT chk_telemetry_deaths CHECK (deaths >= 0)
+);
