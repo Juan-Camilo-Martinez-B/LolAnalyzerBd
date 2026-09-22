@@ -23,3 +23,14 @@ CREATE INDEX IF NOT EXISTS idx_users_summoner ON users (summoner_name, region);
 -- =============================================================================
 CREATE INDEX IF NOT EXISTS idx_token_blacklist_jti ON token_blacklist (token_jti);
 CREATE INDEX IF NOT EXISTS idx_token_blacklist_expires ON token_blacklist (expires_at);
+
+-- =============================================================================
+-- 3. Indexes for Match History & Multi-Criteria Filtering
+-- Optimizes historical match pagination, winrate aggregations,
+-- role-based performance analysis, and champion mastery stats.
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS idx_matches_user_played ON match_records (user_id, played_at DESC);
+CREATE INDEX IF NOT EXISTS idx_matches_user_role ON match_records (user_id, role);
+CREATE INDEX IF NOT EXISTS idx_matches_user_champion ON match_records (user_id, champion_name);
+CREATE INDEX IF NOT EXISTS idx_matches_game_id ON match_records (game_id);
+CREATE INDEX IF NOT EXISTS idx_matches_user_win ON match_records (user_id, win);
