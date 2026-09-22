@@ -40,3 +40,18 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT uq_users_email UNIQUE (email),
     CONSTRAINT uq_users_google_id UNIQUE (google_id)
 );
+
+-- =============================================================================
+-- 2. Table: token_blacklist
+-- Stores cryptographically revoked JWT Unique Identifiers (jti) for immediate
+-- session termination and protection against token replay attacks.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS token_blacklist (
+    id SERIAL PRIMARY KEY,
+    token_jti VARCHAR(255) NOT NULL,
+    revoked_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+
+    -- Integrity Constraints
+    CONSTRAINT uq_token_blacklist_jti UNIQUE (token_jti)
+);
