@@ -1,0 +1,59 @@
+services:
+  # ============================================================================
+  # PostgreSQL 16 Database Server
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: lol_analyzer_postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lol_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lol_secure_password_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-lol_analyzer_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - lol_pgdata:/var/lib/postgresql/data
+      - ./schemas:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lol_admin} -d ${POSTGRES_DB:-lol_analyzer_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - lol_db_net
+
+  # ============================================================================
+  # pgAdmin 4 - Web-based Database Administration UI
+  # Accessible at: http://localhost:5050
+  # ============================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: lol_analyzer_pgadmin
+    restart: unless-stopped
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@lolanalyzer.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin_super_secret_pass}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - lol_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lol_db_net
+
+volumes:
+  lol_pgdata:
+    name: lol_analyzer_pgdata
+  lol_pgadmin_data:
+    name: lol_analyzer_pgadmin_data
+
+networks:
+  lol_db_net:
+    name: lol_analyzer_network
+    driver: bridge
