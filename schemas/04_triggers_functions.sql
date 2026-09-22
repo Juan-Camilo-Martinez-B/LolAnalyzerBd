@@ -17,3 +17,14 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- =============================================================================
+-- 2. Trigger: trg_users_updated_at
+-- Binds the timestamp updater function to row update events on the `users` table.
+-- Ensures strict audit trails whenever player profile or settings change.
+-- =============================================================================
+DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
+CREATE TRIGGER trg_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION fn_update_timestamp();
