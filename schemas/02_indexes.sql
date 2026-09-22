@@ -34,3 +34,11 @@ CREATE INDEX IF NOT EXISTS idx_matches_user_role ON match_records (user_id, role
 CREATE INDEX IF NOT EXISTS idx_matches_user_champion ON match_records (user_id, champion_name);
 CREATE INDEX IF NOT EXISTS idx_matches_game_id ON match_records (game_id);
 CREATE INDEX IF NOT EXISTS idx_matches_user_win ON match_records (user_id, win);
+
+-- =============================================================================
+-- 4. Indexes for High-Frequency Telemetry & Visual Analytics
+-- Supports linear-time retrieval of game timeline points, CS/min progression curves,
+-- death event clusters, and coach advice telemetry streams.
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS idx_telemetry_match_timeline ON match_telemetry_points (match_id, game_time_seconds ASC);
+CREATE INDEX IF NOT EXISTS idx_telemetry_match_time ON match_telemetry_points (match_id, game_time_seconds);
