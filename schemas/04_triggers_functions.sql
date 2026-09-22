@@ -28,3 +28,24 @@ CREATE TRIGGER trg_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION fn_update_timestamp();
+
+-- =============================================================================
+-- 3. Function / Stored Routine: sp_reset_user_matches()
+-- Atomically purges all recorded match history and cascading telemetry data
+-- for a specific user ID, returning the exact count of deleted matches.
+-- =============================================================================
+CREATE OR REPLACE FUNCTION sp_reset_user_matches(p_user_id INTEGER)
+RETURNS INTEGER AS $$
+DECLARE
+    v_deleted_count INTEGER := 0;
+BEGIN
+    WITH deleted_rows AS (
+        DELETE FROM match_records
+        WHERE user_id = p_user_id
+        RETURNING id
+    )
+    SELECT COUNT(*) INTO v_deleted_count FROM deleted_rows;
+
+    RETURN v_deleted_count;
+END;
+$$ LANGUAGE plpgsql;
