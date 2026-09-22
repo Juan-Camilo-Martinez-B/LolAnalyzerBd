@@ -1,0 +1,10 @@
+-r requirements.txt
+
+# Testing & Quality Assurance
+pytest>=8.0.2
+pytest-asyncio>=0.23.5
+
+# SQL & Python Linters / Formatters
+sqlfluff>=2.3.5
+flake8>=7.0.0
+black>=24.2.0
