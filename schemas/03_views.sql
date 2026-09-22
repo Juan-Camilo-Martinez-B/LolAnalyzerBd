@@ -63,3 +63,43 @@ SELECT
 FROM users u
 LEFT JOIN match_records m ON u.id = m.user_id
 GROUP BY u.id, u.username, u.summoner_name, u.region;
+
+-- =============================================================================
+-- 2. View: v_champion_performance
+-- Calculates per-champion mastery metrics per user and role:
+-- Games played, wins, losses, winrate %, average KDA, CS/min, and gold difference.
+-- Directly serves Champion Select AI recommendations and profile mastery tabs.
+-- =============================================================================
+CREATE OR REPLACE VIEW v_champion_performance AS
+SELECT
+    m.user_id,
+    m.champion_name,
+    m.role,
+    COUNT(m.id) AS games_played,
+    COALESCE(SUM(CASE WHEN m.win = TRUE THEN 1 ELSE 0 END), 0) AS wins,
+    COALESCE(SUM(CASE WHEN m.win = FALSE THEN 1 ELSE 0 END), 0) AS losses,
+    ROUND(
+        (SUM(CASE WHEN m.win = TRUE THEN 1.0 ELSE 0.0 END) / COUNT(m.id)) * 100.0, 1
+    ) AS winrate_percentage,
+    ROUND(
+        CASE
+            WHEN SUM(m.deaths) > 0
+            THEN (SUM(m.kills) + SUM(m.assists))::NUMERIC / SUM(m.deaths)::NUMERIC
+            ELSE (SUM(m.kills) + SUM(m.assists))::NUMERIC
+        END, 2
+    ) AS avg_kda,
+    ROUND(AVG(m.kills), 1) AS avg_kills,
+    ROUND(AVG(m.deaths), 1) AS avg_deaths,
+    ROUND(AVG(m.assists), 1) AS avg_assists,
+    ROUND(
+        AVG(
+            CASE
+                WHEN m.duration_seconds > 0
+                THEN (m.cs * 60.0) / m.duration_seconds
+                ELSE 0.0
+            END
+        ), 2
+    ) AS avg_cs_per_minute,
+    ROUND(AVG(m.gold_difference), 0) AS avg_gold_difference
+FROM match_records m
+GROUP BY m.user_id, m.champion_name, m.role;
