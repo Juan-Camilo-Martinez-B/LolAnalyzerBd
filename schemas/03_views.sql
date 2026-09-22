@@ -103,3 +103,40 @@ SELECT
     ROUND(AVG(m.gold_difference), 0) AS avg_gold_difference
 FROM match_records m
 GROUP BY m.user_id, m.champion_name, m.role;
+
+-- =============================================================================
+-- 3. View: v_tilt_coach_analytics
+-- Evaluates correlation between tilt trigger spikes, advice follow-through rate,
+-- death frequencies, and match victory probability.
+-- Serves the AI coach impact and psychological tilt heatmap charts.
+-- =============================================================================
+CREATE OR REPLACE VIEW v_tilt_coach_analytics AS
+SELECT
+    m.user_id,
+    m.role,
+    COUNT(m.id) AS total_games_analyzed,
+    COALESCE(SUM(m.tilt_triggers_count), 0) AS total_tilt_episodes,
+    ROUND(COALESCE(AVG(m.tilt_triggers_count), 0.0), 2) AS avg_tilt_per_game,
+    COALESCE(SUM(m.advices_received_count), 0) AS total_ai_advices_given,
+    COALESCE(SUM(m.advices_followed_count), 0) AS total_ai_advices_followed,
+    ROUND(
+        CASE
+            WHEN COALESCE(SUM(m.advices_received_count), 0) > 0
+            THEN (SUM(m.advices_followed_count)::NUMERIC / SUM(m.advices_received_count)::NUMERIC) * 100.0
+            ELSE 0.0
+        END, 1
+    ) AS coach_compliance_percentage,
+    ROUND(
+        COALESCE(
+            (SUM(CASE WHEN m.win = TRUE AND m.advices_followed_count > 0 THEN 1.0 ELSE 0.0 END) /
+             NULLIF(SUM(CASE WHEN m.advices_followed_count > 0 THEN 1.0 ELSE 0.0 END), 0)) * 100.0, 0.0
+        ), 1
+    ) AS winrate_when_following_coach_pct,
+    ROUND(
+        COALESCE(
+            (SUM(CASE WHEN m.win = TRUE AND m.tilt_triggers_count = 0 THEN 1.0 ELSE 0.0 END) /
+             NULLIF(SUM(CASE WHEN m.tilt_triggers_count = 0 THEN 1.0 ELSE 0.0 END), 0)) * 100.0, 0.0
+        ), 1
+    ) AS winrate_without_tilt_pct
+FROM match_records m
+GROUP BY m.user_id, m.role;
