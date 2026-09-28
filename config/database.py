@@ -59,16 +59,18 @@ class DatabaseSettings(BaseSettings):
         """Returns standard synchronous database URL (psycopg2 / sqlite)."""
         if self.DATABASE_URL and self.DATABASE_URL.strip():
             url = self.DATABASE_URL.strip()
-            # Normalize postgres:// -> postgresql://
+            # Normalize postgres:// and postgresql:// -> postgresql+psycopg2://
             if url.startswith("postgres://"):
-                url = url.replace("postgres://", "postgresql://", 1)
+                url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+            elif url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
             return url
 
         if self.DB_ENGINE.lower() == "sqlite":
             return f"sqlite:///{self.SQLITE_DB_PATH}"
 
         return (
-            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 

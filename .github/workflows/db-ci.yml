@@ -77,7 +77,7 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           POSTGRES_DB: lol_analyzer_db
-          DATABASE_URL: postgresql://lol_admin:lol_secure_password_2026@localhost:5432/lol_analyzer_db
+          DATABASE_URL: postgresql+psycopg2://lol_admin:lol_secure_password_2026@localhost:5432/lol_analyzer_db
         run: |
           python scripts/manage_db.py init
           python scripts/manage_db.py seed
@@ -86,6 +86,6 @@ jobs:
       - name: Run Test Suite (pytest)
         env:
           DB_ENGINE: postgresql
-          DATABASE_URL: postgresql://lol_admin:lol_secure_password_2026@localhost:5432/lol_analyzer_db
+          DATABASE_URL: postgresql+psycopg2://lol_admin:lol_secure_password_2026@localhost:5432/lol_analyzer_db
         run: |
           pytest scripts/test_db.py tests/ -v
