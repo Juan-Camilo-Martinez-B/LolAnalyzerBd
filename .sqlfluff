@@ -1,0 +1,8 @@
+[sqlfluff]
+dialect = postgres
+max_line_length = 120
+exclude_rules = LT05,CP01,ST06,AM04,RF02
+
+[sqlfluff:indentation]
+tab_space_size = 4
+indent_unit = space

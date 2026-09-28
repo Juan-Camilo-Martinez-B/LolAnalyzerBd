@@ -4,7 +4,6 @@ Loads structured test datasets (users, match records, telemetry points)
 into PostgreSQL or SQLite databases.
 """
 
-import os
 import sys
 from pathlib import Path
 from sqlalchemy import text
@@ -13,7 +12,7 @@ from sqlalchemy import text
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from config.database import get_sync_engine, settings
+from config.database import get_sync_engine, settings  # noqa: E402
 
 SEEDS_DIR = Path(__file__).resolve().parent
 

@@ -13,9 +13,9 @@ from sqlalchemy import inspect
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from alembic import command
-from alembic.config import Config
-from config.database import get_sync_engine, settings
+from alembic import command  # noqa: E402
+from alembic.config import Config  # noqa: E402
+from config.database import get_sync_engine, settings  # noqa: E402
 
 ALEMBIC_INI_PATH = BASE_DIR / "migrations" / "alembic.ini"
 

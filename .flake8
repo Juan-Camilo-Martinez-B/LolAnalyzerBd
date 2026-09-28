@@ -1,0 +1,20 @@
+[flake8]
+max-line-length = 120
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    migrations/versions,
+    build,
+    dist
+ignore =
+    E203,
+    W503
+per-file-ignores =
+    migrations/env.py: E402
+    scripts/manage_db.py: E402
+    scripts/test_db.py: E402
+    seeds/seed_runner.py: E402
+    tests/test_migrations.py: E402

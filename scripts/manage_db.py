@@ -5,7 +5,6 @@ seed data population, database reset, status checks, and schema inspection.
 """
 
 import argparse
-import os
 import sys
 from pathlib import Path
 from sqlalchemy import inspect, text
@@ -14,10 +13,10 @@ from sqlalchemy import inspect, text
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from alembic import command
-from alembic.config import Config
-from config.database import get_sync_engine, settings
-from seeds.seed_runner import run_seeds
+from alembic import command  # noqa: E402
+from alembic.config import Config  # noqa: E402
+from config.database import get_sync_engine, settings  # noqa: E402
+from seeds.seed_runner import run_seeds  # noqa: E402
 
 SCHEMAS_DIR = BASE_DIR / "schemas"
 ALEMBIC_INI_PATH = BASE_DIR / "migrations" / "alembic.ini"
@@ -81,7 +80,7 @@ def cmd_init() -> None:
 def cmd_migrate() -> None:
     """Applies all pending Alembic migrations up to head."""
     print("====================================================================")
-    print(f"  [>] Running Alembic Migrations (upgrade head)...")
+    print("  [>] Running Alembic Migrations (upgrade head)...")
     print("====================================================================")
     cfg = get_alembic_config()
     command.upgrade(cfg, "head")
@@ -91,7 +90,7 @@ def cmd_migrate() -> None:
 def cmd_rollback() -> None:
     """Rolls back the most recent migration (-1)."""
     print("====================================================================")
-    print(f"  [>] Rolling back 1 migration step (downgrade -1)...")
+    print("  [>] Rolling back 1 migration step (downgrade -1)...")
     print("====================================================================")
     cfg = get_alembic_config()
     command.downgrade(cfg, "-1")
@@ -136,7 +135,10 @@ def cmd_status() -> None:
     print("  LolAnalyzer Database - Status Report")
     print("====================================================================")
     print(f"  Engine:            {settings.DB_ENGINE.upper()}")
-    print(f"  Connection URL:    {settings.sync_database_url.split('@')[-1] if '@' in settings.sync_database_url else settings.sync_database_url}")
+
+    raw_url = settings.sync_database_url
+    safe_url = raw_url.split("@")[-1] if "@" in raw_url else raw_url
+    print(f"  Connection Target: {safe_url}")
     print("--------------------------------------------------------------------")
 
     engine = get_sync_engine()
@@ -144,7 +146,8 @@ def cmd_status() -> None:
 
     try:
         tables = inspector.get_table_names()
-        print(f"  Tables Found:      {len(tables)} ({', '.join(tables) if tables else 'None'})")
+        table_list_str = ", ".join(tables) if tables else "None"
+        print(f"  Tables Found:      {len(tables)} ({table_list_str})")
 
         with engine.connect() as conn:
             for table in ["users", "token_blacklist", "match_records", "match_telemetry_points"]:
@@ -154,7 +157,8 @@ def cmd_status() -> None:
                     print(f"    - {table:<25}: {count:>6} rows")
 
         views = inspector.get_view_names()
-        print(f"  Views Found:       {len(views)} ({', '.join(views) if views else 'None'})")
+        view_list_str = ", ".join(views) if views else "None"
+        print(f"  Views Found:       {len(views)} ({view_list_str})")
 
     except Exception as e:
         print(f"  [!] Connection or inspection error: {e}")

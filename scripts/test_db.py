@@ -4,7 +4,6 @@ Validates relational integrity, UNIQUE constraints, cascading deletes,
 and the validity of analytical views across PostgreSQL and SQLite.
 """
 
-import os
 import sys
 import uuid
 from pathlib import Path
@@ -16,7 +15,7 @@ from sqlalchemy.exc import IntegrityError
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from config.database import get_sync_engine, settings
+from config.database import get_sync_engine  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -88,8 +87,9 @@ def test_cascade_deletion(db_engine):
         # 2. Insert Match for this User
         match_res = conn.execute(
             text("""
-                INSERT INTO match_records (user_id, champion_name, role, kills, deaths, assists, cs, duration_seconds, win)
-                VALUES (:user_id, 'Ahri', 'MID', 5, 0, 5, 100, 1200, true)
+                INSERT INTO match_records (
+                    user_id, champion_name, role, kills, deaths, assists, cs, duration_seconds, win
+                ) VALUES (:user_id, 'Ahri', 'MID', 5, 0, 5, 100, 1200, true)
                 RETURNING id
             """),
             {"user_id": user_id},

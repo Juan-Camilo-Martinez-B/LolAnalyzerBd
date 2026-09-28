@@ -28,11 +28,11 @@ jobs:
 
       - name: Run Python Lint (flake8)
         run: |
-          flake8 . --max-line-length=110 --exclude=.venv,env,migrations/versions
+          flake8 . --config=.flake8
 
       - name: Run SQLFluff Lint
         run: |
-          sqlfluff lint schemas/ migrations/sql/ --dialect postgres
+          sqlfluff lint schemas/ migrations/sql/ --config=.sqlfluff
 
   test-postgres:
     name: PostgreSQL Migration & Integrity Tests

@@ -4,7 +4,6 @@ Provides online and offline migration runners using project configuration settin
 """
 
 from logging.config import fileConfig
-import os
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -21,7 +20,7 @@ except ImportError:
         from alembic.runtime.environment import EnvironmentContext
         context: EnvironmentContext = None  # type: ignore
 
-from config.database import get_sync_engine, settings
+from config.database import get_sync_engine, settings  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

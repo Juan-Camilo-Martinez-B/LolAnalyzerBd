@@ -4,13 +4,11 @@ Handles environment variables, URL synthesis, connection pooling,
 and provides sync and async engines for migrations, scripts, and ORMs.
 """
 
-import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
-from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
