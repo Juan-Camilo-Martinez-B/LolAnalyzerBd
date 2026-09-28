@@ -65,7 +65,7 @@ def run_seeds() -> None:
             print(f"    [+] {seed_file} applied successfully.")
 
     print("====================================================================")
-    print("  [✓] All database seeds have been loaded successfully!")
+    print("  [+] All database seeds have been loaded successfully!")
     print("====================================================================")
 
 

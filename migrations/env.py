@@ -39,7 +39,7 @@ def run_migrations_offline() -> None:
     Run migrations in 'offline' mode.
     Configures the context with just a URL and not an Engine.
     """
-    url = settings.sync_database_url
+    url = (config.get_main_option("sqlalchemy.url") if config else None) or settings.sync_database_url
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -57,14 +57,21 @@ def run_migrations_online() -> None:
     Run migrations in 'online' mode.
     Creates an Engine and associates a connection with the context.
     """
-    connectable = get_sync_engine()
+    from sqlalchemy import create_engine
+    custom_url = config.get_main_option("sqlalchemy.url") if config else None
+    if custom_url:
+        connectable = create_engine(custom_url)
+    else:
+        connectable = get_sync_engine()
+
+    is_sqlite = str(connectable.url).startswith("sqlite")
 
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
             compare_type=True,
-            render_as_batch=True if settings.sync_database_url.startswith("sqlite") else False,
+            render_as_batch=is_sqlite,
         )
 
         with context.begin_transaction():

@@ -30,6 +30,99 @@ def get_alembic_config() -> Config:
     return cfg
 
 
+def split_sql_statements(content: str) -> list[str]:
+    """
+    Splits SQL script content by semicolon (;), taking into account
+    dollar-quoted strings ($$ ... $$) and single quotes (' ... ') to avoid
+    splitting function bodies and multiline literals.
+    """
+    statements = []
+    current = []
+    in_dollar_quote = False
+    dollar_tag = "$$"
+    in_single_quote = False
+    in_line_comment = False
+    in_block_comment = False
+
+    i = 0
+    n = len(content)
+    while i < n:
+        char = content[i]
+
+        # Check line comments
+        if not in_dollar_quote and not in_single_quote and not in_block_comment:
+            if char == "-" and i + 1 < n and content[i + 1] == "-":
+                in_line_comment = True
+        if in_line_comment:
+            if char == "\n":
+                in_line_comment = False
+            current.append(char)
+            i += 1
+            continue
+
+        # Check block comments
+        if not in_dollar_quote and not in_single_quote and not in_line_comment:
+            if char == "/" and i + 1 < n and content[i + 1] == "*":
+                in_block_comment = True
+        if in_block_comment:
+            if char == "*" and i + 1 < n and content[i + 1] == "/":
+                in_block_comment = False
+                current.append("*/")
+                i += 2
+                continue
+            current.append(char)
+            i += 1
+            continue
+
+        # Check dollar quotes $$ or $tag$
+        if not in_single_quote and char == "$":
+            j = i + 1
+            while j < n and (content[j].isalnum() or content[j] == "_"):
+                j += 1
+            if j < n and content[j] == "$":
+                tag = content[i : j + 1]
+                if in_dollar_quote and tag == dollar_tag:
+                    in_dollar_quote = False
+                    current.append(tag)
+                    i = j + 1
+                    continue
+                elif not in_dollar_quote:
+                    in_dollar_quote = True
+                    dollar_tag = tag
+                    current.append(tag)
+                    i = j + 1
+                    continue
+
+        # Check single quotes
+        if not in_dollar_quote and char == "'":
+            if in_single_quote and i + 1 < n and content[i + 1] == "'":
+                current.append("''")
+                i += 2
+                continue
+            in_single_quote = not in_single_quote
+            current.append(char)
+            i += 1
+            continue
+
+        # Check statement delimiter
+        if char == ";" and not in_dollar_quote and not in_single_quote:
+            stmt_text = "".join(current).strip()
+            if stmt_text:
+                statements.append(stmt_text)
+            current = []
+            i += 1
+            continue
+
+        current.append(char)
+        i += 1
+
+    remaining = "".join(current).strip()
+    if remaining:
+        statements.append(remaining)
+
+    return statements
+
+
 def cmd_init() -> None:
     """Initializes tables, indexes, functions, triggers, and views directly via SQL."""
     print("====================================================================")
@@ -62,7 +155,7 @@ def cmd_init() -> None:
                 print("    [-] Skipped PL/pgSQL functions for SQLite runtime.")
                 continue
 
-            statements = [s.strip() for s in content.split(";") if s.strip()]
+            statements = split_sql_statements(content)
             for stmt in statements:
                 try:
                     conn.execute(text(stmt))
@@ -73,7 +166,7 @@ def cmd_init() -> None:
             print(f"    [+] {file_name} executed.")
 
     print("====================================================================")
-    print("  [✓] Database schema initialized successfully!")
+    print("  [+] Database schema initialized successfully!")
     print("====================================================================")
 
 
@@ -84,7 +177,7 @@ def cmd_migrate() -> None:
     print("====================================================================")
     cfg = get_alembic_config()
     command.upgrade(cfg, "head")
-    print("  [✓] Migrations applied successfully!")
+    print("  [+] Migrations applied successfully!")
 
 
 def cmd_rollback() -> None:
@@ -94,7 +187,7 @@ def cmd_rollback() -> None:
     print("====================================================================")
     cfg = get_alembic_config()
     command.downgrade(cfg, "-1")
-    print("  [✓] Rollback executed successfully!")
+    print("  [+] Rollback executed successfully!")
 
 
 def cmd_seed() -> None:
