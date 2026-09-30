@@ -29,6 +29,14 @@ CREATE TABLE IF NOT EXISTS users (
     preferred_roles VARCHAR(100) NOT NULL DEFAULT 'MID,TOP',
     coach_sensitivity VARCHAR(20) NOT NULL DEFAULT 'normal',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    session_version INTEGER NOT NULL DEFAULT 1,
+    failed_login_count INTEGER NOT NULL DEFAULT 0,
+    locked_until TIMESTAMP WITH TIME ZONE NULL,
+
+    -- Riot account identifiers only. Match payloads stay on Riot's API.
+    riot_puuid VARCHAR(80) NULL,
+    riot_game_name VARCHAR(100) NULL,
+    riot_tag_line VARCHAR(20) NULL,
 
     -- Audit Timestamps
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -38,7 +46,8 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT chk_users_auth_provider CHECK (auth_provider IN ('local', 'google', 'both')),
     CONSTRAINT chk_users_coach_sensitivity CHECK (coach_sensitivity IN ('low', 'normal', 'high')),
     CONSTRAINT uq_users_email UNIQUE (email),
-    CONSTRAINT uq_users_google_id UNIQUE (google_id)
+    CONSTRAINT uq_users_google_id UNIQUE (google_id),
+    CONSTRAINT uq_users_riot_puuid UNIQUE (riot_puuid)
 );
 
 -- =============================================================================
@@ -119,4 +128,44 @@ CREATE TABLE IF NOT EXISTS match_telemetry_points (
     CONSTRAINT chk_telemetry_cs_pm CHECK (cs_per_minute >= 0.0),
     CONSTRAINT chk_telemetry_kills CHECK (kills >= 0),
     CONSTRAINT chk_telemetry_deaths CHECK (deaths >= 0)
+);
+
+-- =============================================================================
+-- 5. Table: security_answers
+-- Hashed recovery answers. Plaintext answers are never stored.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS security_answers (
+    user_id INTEGER PRIMARY KEY,
+    favorite_champion_hash VARCHAR(255) NOT NULL,
+    peak_elo_hash VARCHAR(255) NOT NULL,
+    first_main_hash VARCHAR(255) NOT NULL,
+    failed_attempts INTEGER NOT NULL DEFAULT 0,
+    locked_until TIMESTAMP WITH TIME ZONE NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_security_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE
+);
+
+-- =============================================================================
+-- 6. Table: auth_attempts
+-- Shared lockout counter. subject_hash is not the raw email.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS auth_attempts (
+    id SERIAL PRIMARY KEY,
+    subject_hash VARCHAR(64) NOT NULL,
+    purpose VARCHAR(32) NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    window_started TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    locked_until TIMESTAMP WITH TIME ZONE NULL,
+    CONSTRAINT uq_auth_attempt_subject UNIQUE (subject_hash, purpose)
+);
+
+-- =============================================================================
+-- 7. Table: riot_cache
+-- TTL cache for Riot responses. It is not a permanent match archive.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS riot_cache (
+    cache_key VARCHAR(255) PRIMARY KEY,
+    payload TEXT NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
 );

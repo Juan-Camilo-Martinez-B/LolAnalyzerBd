@@ -170,5 +170,9 @@ sqlfluff lint schemas/ migrations/sql/ --dialect postgres
 
 ---
 
+## Cuenta, recuperación y Riot
+
+`0004_auth_recovery_and_riot_link` agrega columnas de sesión y Riot ID en `users`, más `security_answers`, `auth_attempts` y `riot_cache`. Las respuestas de seguridad se guardan hasheadas. `riot_cache` es temporal y no sustituye el historial de coach en `match_records`.
+
 ## 👥 Contribuidores & Créditos
 Proyecto desarrollado para la asignatura de Programación Web (7mo Semestre) - **LolAnalyzer**.
