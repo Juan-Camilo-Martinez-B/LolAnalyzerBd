@@ -163,7 +163,26 @@ CREATE TABLE IF NOT EXISTS auth_attempts (
 );
 
 -- =============================================================================
--- 7. Table: riot_cache
+-- 7. Table: coach_advice_logs
+-- Tips the AI already gave this account. They stay after logout.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS coach_advice_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    advice_text VARCHAR(240) NOT NULL,
+    trigger_type VARCHAR(40) NOT NULL,
+    severity VARCHAR(20) NOT NULL,
+    champion_name VARCHAR(40) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    game_time_seconds DOUBLE PRECISION NOT NULL DEFAULT 0,
+    source VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS ix_coach_advice_logs_user_id ON coach_advice_logs (user_id);
+
+-- =============================================================================
+-- 8. Table: riot_cache
 -- TTL cache for Riot responses. It is not a permanent match archive.
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS riot_cache (
