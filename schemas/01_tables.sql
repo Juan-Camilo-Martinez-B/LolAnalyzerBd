@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
     -- AI Tactical Coach Preferences & Heuristic Sensitivity
     preferred_roles VARCHAR(100) NOT NULL DEFAULT 'MID,TOP',
     coach_sensitivity VARCHAR(20) NOT NULL DEFAULT 'normal',
+    theme_preference VARCHAR(20) NOT NULL DEFAULT 'light',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     session_version INTEGER NOT NULL DEFAULT 1,
     failed_login_count INTEGER NOT NULL DEFAULT 0,
@@ -45,6 +46,7 @@ CREATE TABLE IF NOT EXISTS users (
     -- Integrity Constraints
     CONSTRAINT chk_users_auth_provider CHECK (auth_provider IN ('local', 'google', 'both')),
     CONSTRAINT chk_users_coach_sensitivity CHECK (coach_sensitivity IN ('low', 'normal', 'high')),
+    CONSTRAINT chk_users_theme_preference CHECK (theme_preference IN ('light', 'system', 'dark')),
     CONSTRAINT uq_users_email UNIQUE (email),
     CONSTRAINT uq_users_google_id UNIQUE (google_id),
     CONSTRAINT uq_users_riot_puuid UNIQUE (riot_puuid)
