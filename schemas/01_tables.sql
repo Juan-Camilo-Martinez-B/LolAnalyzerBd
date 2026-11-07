@@ -223,3 +223,26 @@ CREATE TABLE IF NOT EXISTS local_match_history (
         REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT uq_local_match_user_game UNIQUE (user_id, external_match_id)
 );
+
+-- =============================================================================
+-- 10. Table: match_analyses
+-- One post-match analysis per user and game, written from the final match
+-- summary. Stored so a game is analysed once and never billed twice.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS match_analyses (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    external_match_id VARCHAR(40) NOT NULL,
+    champion_name VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
+    win BOOLEAN NOT NULL DEFAULT FALSE,
+    metrics_json TEXT NOT NULL DEFAULT '[]',
+    strengths VARCHAR(300) NOT NULL,
+    improvements VARCHAR(300) NOT NULL,
+    focus VARCHAR(300) NOT NULL,
+    source VARCHAR(20) NOT NULL DEFAULT 'rules',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_match_analysis_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT uq_match_analysis_user_game UNIQUE (user_id, external_match_id)
+);

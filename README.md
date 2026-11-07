@@ -176,5 +176,7 @@ sqlfluff lint schemas/ migrations/sql/ --dialect postgres
 
 `0005_user_theme_preference` guarda en `users.theme_preference` la apariencia de la cuenta: `light` (predeterminado), `system` o `dark`.
 
+`0008_match_analyses` agrega `match_analyses`: un análisis post-partida por usuario y partida (`UNIQUE (user_id, external_match_id)`), escrito con el resumen final de la partida. La unicidad evita repetir el análisis y su costo en la API de IA. Ver [docs/data_dictionary.md](docs/data_dictionary.md).
+
 ## 👥 Contribuidores & Créditos
 Proyecto desarrollado para la asignatura de Programación Web (7mo Semestre) - **LolAnalyzer**.

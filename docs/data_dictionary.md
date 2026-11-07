@@ -78,3 +78,23 @@ Registra la serie temporal de alta frecuencia segundo a segundo durante el trans
 | `deaths` | `INTEGER` | No | `0` | - | `CHECK (deaths >= 0)` | Muertes acumuladas en este segundo. |
 | `flash_ready` | `BOOLEAN` | No | `TRUE` | - | `TRUE` (Disponible) / `FALSE` (En Enfriamiento) | Estado del hechizo de invocador Destello (Flash). |
 | `advice_text` | `VARCHAR(255)` | Sí | `NULL` | - | - | Consejo táctico emitido por el Copilot de IA en este segundo. |
+
+---
+
+## 5. Tabla: `match_analyses`
+Guarda un análisis post-partida por usuario y partida. Se escribe una sola vez con el resumen final de la partida (no con la telemetría en vivo), así una partida nunca se analiza ni se cobra dos veces en la API de IA.
+
+| Columna | Tipo de Dato | Nulo | Por Defecto | Clave | Restricciones / Reglas de Negocio | Descripción |
+| :--- | :--- | :---: | :--- | :---: | :--- | :--- |
+| `id` | `SERIAL / INT` | No | Autoincremental | **PK** | `PRIMARY KEY` | Identificador del análisis. |
+| `user_id` | `INTEGER` | No | - | **FK** | `FOREIGN KEY (users.id) ON DELETE CASCADE` | Dueño del análisis. |
+| `external_match_id` | `VARCHAR(40)` | No | - | - | `UNIQUE (user_id, external_match_id)` | Id de la partida (el mismo de `local_match_history`). |
+| `champion_name` | `VARCHAR(100)` | No | - | - | - | Campeón jugado. |
+| `role` | `VARCHAR(20)` | No | `'UNKNOWN'` | - | - | Rol jugado. |
+| `win` | `BOOLEAN` | No | `FALSE` | - | - | Resultado. |
+| `metrics_json` | `TEXT` | No | `'[]'` | - | JSON | Métricas calculadas frente a la referencia del rol (valor, meta y veredicto). |
+| `strengths` | `VARCHAR(300)` | No | - | - | - | Lo que salió bien. |
+| `improvements` | `VARCHAR(300)` | No | - | - | - | Qué mejorar. |
+| `focus` | `VARCHAR(300)` | No | - | - | - | Un foco concreto para la próxima partida. |
+| `source` | `VARCHAR(20)` | No | `'rules'` | - | `groq` o `rules` | Quién redactó el texto: Groq o las reglas sin IA. |
+| `created_at` | `TIMESTAMPTZ` | No | `CURRENT_TIMESTAMP` | - | Índice `(user_id, created_at DESC)` | Fecha del análisis. |
