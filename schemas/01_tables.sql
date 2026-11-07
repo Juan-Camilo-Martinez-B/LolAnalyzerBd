@@ -190,3 +190,36 @@ CREATE TABLE IF NOT EXISTS riot_cache (
     payload TEXT NOT NULL,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
+
+-- =============================================================================
+-- 9. Table: local_match_history
+-- Summaries synced from the local League client. Kept after the client closes.
+-- Does not alter match_records.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS local_match_history (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    external_match_id VARCHAR(40) NOT NULL,
+    champion_name VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
+    kills INTEGER NOT NULL DEFAULT 0,
+    deaths INTEGER NOT NULL DEFAULT 0,
+    assists INTEGER NOT NULL DEFAULT 0,
+    kda DOUBLE PRECISION NOT NULL DEFAULT 0,
+    cs INTEGER NOT NULL DEFAULT 0,
+    cs_per_min DOUBLE PRECISION NOT NULL DEFAULT 0,
+    duration_seconds INTEGER NOT NULL DEFAULT 0,
+    win BOOLEAN NOT NULL DEFAULT FALSE,
+    queue_id INTEGER NOT NULL DEFAULT 0,
+    game_mode VARCHAR(40) NOT NULL DEFAULT 'CLASSIC',
+    gold_earned INTEGER NOT NULL DEFAULT 0,
+    vision_score INTEGER NOT NULL DEFAULT 0,
+    damage_dealt INTEGER NOT NULL DEFAULT 0,
+    items_json TEXT NOT NULL DEFAULT '[]',
+    trinket_id INTEGER NOT NULL DEFAULT 0,
+    played_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    source VARCHAR(20) NOT NULL DEFAULT 'lcu',
+    CONSTRAINT fk_local_match_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT uq_local_match_user_game UNIQUE (user_id, external_match_id)
+);

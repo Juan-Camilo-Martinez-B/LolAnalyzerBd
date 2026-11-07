@@ -42,3 +42,6 @@ CREATE INDEX IF NOT EXISTS idx_matches_user_win ON match_records (user_id, win);
 -- =============================================================================
 CREATE INDEX IF NOT EXISTS idx_telemetry_match_timeline ON match_telemetry_points (match_id, game_time_seconds ASC);
 CREATE INDEX IF NOT EXISTS idx_telemetry_match_time ON match_telemetry_points (match_id, game_time_seconds);
+
+-- Local client match archive. Separate from match_records.
+CREATE INDEX IF NOT EXISTS ix_local_match_history_user_played ON local_match_history (user_id, played_at DESC);
