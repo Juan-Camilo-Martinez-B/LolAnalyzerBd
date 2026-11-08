@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT chk_users_coach_sensitivity CHECK (coach_sensitivity IN ('low', 'normal', 'high')),
     CONSTRAINT chk_users_theme_preference CHECK (theme_preference IN ('light', 'system', 'dark')),
     CONSTRAINT uq_users_email UNIQUE (email),
-    CONSTRAINT uq_users_google_id UNIQUE (google_id),
-    CONSTRAINT uq_users_riot_puuid UNIQUE (riot_puuid)
+    CONSTRAINT uq_users_google_id UNIQUE (google_id)
+    -- riot_puuid is not unique: one Riot ID can be linked to several accounts.
 );
 
 -- =============================================================================
@@ -219,9 +219,31 @@ CREATE TABLE IF NOT EXISTS local_match_history (
     trinket_id INTEGER NOT NULL DEFAULT 0,
     played_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     source VARCHAR(20) NOT NULL DEFAULT 'lcu',
+    -- League account the game was played with; NULL for imported demo games.
+    riot_puuid VARCHAR(80) NULL,
     CONSTRAINT fk_local_match_user FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT uq_local_match_user_game UNIQUE (user_id, external_match_id)
+);
+
+-- =============================================================================
+-- 9b. Table: riot_profiles
+-- League accounts seen in the client for each analyzer account. The dashboard
+-- follows the open client and can switch between these profiles.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS riot_profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    puuid VARCHAR(80) NOT NULL,
+    game_name VARCHAR(100) NULL,
+    tag_line VARCHAR(20) NULL,
+    profile_icon_id INTEGER NULL,
+    summoner_level INTEGER NULL,
+    ranked_solo_json TEXT NULL,
+    last_seen_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_riot_profile_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT uq_riot_profile_user_puuid UNIQUE (user_id, puuid)
 );
 
 -- =============================================================================

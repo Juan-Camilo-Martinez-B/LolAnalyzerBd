@@ -45,6 +45,9 @@ CREATE INDEX IF NOT EXISTS idx_telemetry_match_time ON match_telemetry_points (m
 
 -- Local client match archive. Separate from match_records.
 CREATE INDEX IF NOT EXISTS ix_local_match_history_user_played ON local_match_history (user_id, played_at DESC);
+CREATE INDEX IF NOT EXISTS ix_local_match_user_puuid ON local_match_history (user_id, riot_puuid);
+CREATE INDEX IF NOT EXISTS ix_riot_profiles_user_seen ON riot_profiles (user_id, last_seen_at DESC);
+CREATE INDEX IF NOT EXISTS ix_users_riot_puuid ON users (riot_puuid);
 
 -- Post-match analyses, newest first per user.
 CREATE INDEX IF NOT EXISTS ix_match_analyses_user_created ON match_analyses (user_id, created_at DESC);
