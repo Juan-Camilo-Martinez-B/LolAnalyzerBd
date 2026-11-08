@@ -153,6 +153,17 @@ DATABASE_URL=postgresql://postgres.your-project-ref:your-password@aws-0-us-east-
 | `python scripts/manage_db.py status` | Muestra el estado de la conexión y conteo de filas por tabla. |
 | `python scripts/manage_db.py reset` | Elimina y reconstruye todo el esquema desde cero. |
 
+### 4. Correcciones de datos
+
+`scripts/fix_coach_sources.py` corrige los consejos del coach que Groq redactó pero el backend anterior a la 1.1.0 guardó con `source = 'gemini'` (no reconocía los modelos `gpt-oss`). Solo toca filas creadas antes del despliegue de la 1.1.0, es idempotente y sin `--apply` solo muestra cuántas filas cambiaría:
+
+```bash
+python scripts/fix_coach_sources.py          # conteo, sin cambios
+python scripts/fix_coach_sources.py --apply  # corrige a 'groq'
+```
+
+Se aplicó en Supabase el 8 de noviembre de 2026 (5 consejos).
+
 ---
 
 ## 🧪 Pruebas Automatizadas y Calidad

@@ -4,6 +4,11 @@ Todos los cambios notables en la arquitectura, migraciones y procedimientos de l
 
 ---
 
+## [1.1.0] - 2026-11-08
+
+### Fixed
+- `scripts/fix_coach_sources.py`: los consejos de Groq guardados como `gemini` por el backend anterior a la 1.1.0 pasan a `groq` (aplicado en Supabase, 5 filas).
+
 ## [1.0.0] - 2026-09-28
 
 ### Añadido (Added)
