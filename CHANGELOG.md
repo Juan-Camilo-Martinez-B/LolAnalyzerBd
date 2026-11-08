@@ -4,6 +4,12 @@ Todos los cambios notables en la arquitectura, migraciones y procedimientos de l
 
 ---
 
+## [1.2.0] - 2026-11-08
+
+### Added
+- `0009_riot_profiles`: `local_match_history.riot_puuid`, tabla `riot_profiles` y vínculo de Riot ID no exclusivo.
+- `0010_matchup_reports`: tabla `matchup_reports` con el plan de línea de cada jugador.
+
 ## [1.1.0] - 2026-11-08
 
 ### Fixed

@@ -189,5 +189,9 @@ sqlfluff lint schemas/ migrations/sql/ --dialect postgres
 
 `0008_match_analyses` agrega `match_analyses`: un análisis post-partida por usuario y partida (`UNIQUE (user_id, external_match_id)`), escrito con el resumen final de la partida. La unicidad evita repetir el análisis y su costo en la API de IA. Ver [docs/data_dictionary.md](docs/data_dictionary.md).
 
+`0009_riot_profiles` permite varios perfiles de League por cuenta: agrega `local_match_history.riot_puuid` (las partidas anteriores toman el Riot ID vinculado), crea `riot_profiles` (`UNIQUE (user_id, puuid)`, con nombre, nivel, icono, rango y `last_seen_at`) y cambia el índice único `uq_users_riot_puuid` por uno normal, para que un Riot ID pueda vincularse a varias cuentas.
+
+`0010_matchup_reports` crea `matchup_reports`: el plan de línea que recibió cada jugador, uno por cuenta y matchup (`UNIQUE (user_id, champion, opponent, lane)`).
+
 ## 👥 Contribuidores & Créditos
 Proyecto desarrollado para la asignatura de Programación Web (7mo Semestre) - **LolAnalyzer**.
