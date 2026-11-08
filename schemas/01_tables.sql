@@ -247,6 +247,27 @@ CREATE TABLE IF NOT EXISTS riot_profiles (
 );
 
 -- =============================================================================
+-- 9c. Table: matchup_reports
+-- Lane plan each player received in champion select. One row per matchup.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS matchup_reports (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    champion VARCHAR(40) NOT NULL,
+    opponent VARCHAR(40) NOT NULL,
+    lane VARCHAR(12) NOT NULL,
+    plan_lane VARCHAR(400) NOT NULL,
+    plan_fight VARCHAR(400) NOT NULL,
+    plan_avoid VARCHAR(400) NOT NULL,
+    source VARCHAR(20) NOT NULL DEFAULT 'rules',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_matchup_report_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT uq_matchup_report_user_matchup UNIQUE (user_id, champion, opponent, lane)
+);
+
+-- =============================================================================
 -- 10. Table: match_analyses
 -- One post-match analysis per user and game, written from the final match
 -- summary. Stored so a game is analysed once and never billed twice.
